@@ -1,3 +1,6 @@
+const PLAYER_START_X = 2*101;
+const PLAYER_START_Y = 5*83-20;
+
 // Enemies our player must avoid
 var Enemy = function() {
     // Variables applied to each of our instances go here,
@@ -6,11 +9,23 @@ var Enemy = function() {
     // The image/sprite for our enemies, this uses
     // a helper we've provided to easily load images
     this.sprite = 'images/enemy-bug.png';
+    this.x = Math.floor((Math.random()* (-100) - 100));
+    this.y = Math.floor((Math.random() * 3) + 1)*83-20;
+    this.speed = Math.floor((Math.random()*12)+ 3)*25;
 };
 
 // Update the enemy's position, required method for game
 // Parameter: dt, a time delta between ticks
 Enemy.prototype.update = function(dt) {
+    this.x > 550 
+        ? this.regenerate() 
+        : this.x += dt*this.speed;        
+    ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
+
+    this.x > player.x - 75 && this.x < player.x + 50 && this.y == player.y
+        ? player.reset()
+        : null
+
     // You should multiply any movement by the dt parameter
     // which will ensure the game runs at the same speed for
     // all computers.
@@ -21,15 +36,60 @@ Enemy.prototype.render = function() {
     ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
 };
 
+Enemy.prototype.regenerate = function() {
+    this.x = Math.floor((Math.random()* (-100) - 100));
+    this.y = Math.floor((Math.random() * 3) + 1)*83-20;
+    this.speed = Math.floor((Math.random()*12)+ 2)*25;
+};
+
 // Now write your own player class
 // This class requires an update(), render() and
 // a handleInput() method.
+var Player = function(){
+    this.sprite = 'images/char-boy.png';
+    this.x = PLAYER_START_X;
+    this.y = PLAYER_START_Y;
+};
 
+Player.prototype.update = function() {
+        this.y <= 0
+            ? player.reset()
+            : ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
+
+};
+
+Player.prototype.render = function() {
+        ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
+};
+
+Player.prototype.reset = function() {
+    this.x = PLAYER_START_X;
+    this.y = PLAYER_START_Y;
+};
+
+Player.prototype.handleInput = function(e) {
+    switch(e){
+        case 'left':
+            if(this.x > 0) this.x -= 101;
+            break;
+        case 'up':
+            this.y -= 83;
+            break;
+        case 'right':
+            if(this.x < PLAYER_START_X + 2*101) this.x += 101;
+            break;
+        case 'down':
+            if(this.y < PLAYER_START_Y) this.y += 83;
+            break;
+    }
+};
 
 // Now instantiate your objects.
 // Place all enemy objects in an array called allEnemies
 // Place the player object in a variable called player
 
+var player = new Player;
+var allEnemies = [new Enemy, new Enemy, new Enemy, new Enemy];
 
 
 // This listens for key presses and sends the keys to your
